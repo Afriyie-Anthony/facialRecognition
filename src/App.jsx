@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Register from './pages/register'
 import TakeAttendance from './pages/TakeAttendance'
 import AdminLayout from './pages/AdminDashboard/AdminLayout'
 import DashboardPage from './pages/AdminDashboard/DashboardPage'
@@ -14,8 +13,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Register />} />
-        <Route path="/takeattendance" element={<TakeAttendance/>} />
+        <Route path="/" element={<TakeAttendance/>} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
