@@ -20,14 +20,14 @@ export default function ProfilePage() {
     <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">Admin Profile</h2>
+          <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Admin Profile</h2>
           <p className="text-slate-500 mt-2 font-medium">Manage your personal account details and credentials.</p>
         </div>
       </header>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="bg-indigo-600 h-32 relative">
-           <div className="absolute inset-0 bg-linear-to-r from-indigo-600 to-violet-600 opacity-90"></div>
+           <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-violet-600 opacity-90"></div>
            {/* Decorative pattern */}
            <svg className="absolute inset-0 h-full w-full text-white/10" fill="currentColor" viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,100 100,0 100,100"/></svg>
         </div>

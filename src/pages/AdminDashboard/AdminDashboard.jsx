@@ -1,23 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-
-const initialStudents = [
-  { id: 's1', fullName: 'John Acheampong', className: 'Form 1 A', indexNumber: 'STU001' },
-  { id: 's2', fullName: 'Mary Osei', className: 'Form 1 A', indexNumber: 'STU002' },
-  { id: 's3', fullName: 'Peter Asante', className: 'Form 1 B', indexNumber: 'STU003' },
-  { id: 's4', fullName: 'Grace Boateng', className: 'Form 2 A', indexNumber: 'STU004' },
-];
-
-const initialAttendance = [
-  { id: 'a1', className: 'Form 1 A', indexNumber: 'STU001', date: '2026-03-21', status: 'present' },
-  { id: 'a2', className: 'Form 1 A', indexNumber: 'STU002', date: '2026-03-21', status: 'present' },
-  { id: 'a3', className: 'Form 1 B', indexNumber: 'STU003', date: '2026-03-21', status: 'absent' },
-];
+import { useAdminData } from '../../contexts/AdminDataContext';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function AdminDashboard() {
-  const [students, setStudents] = useState(initialStudents);
-  const [attendance, setAttendance] = useState(initialAttendance);
-  const [message, setMessage] = useState('');
+  const { students, attendance, addStudent: ctxAddStudent, deleteStudent: ctxDeleteStudent, addAttendance: ctxAddAttendance, deleteAttendance: ctxDeleteAttendance } = useAdminData();
+  const toast = useToast();
 
   const [studentForm, setStudentForm] = useState({
     fullName: '',
@@ -93,7 +81,7 @@ export default function AdminDashboard() {
     e.preventDefault();
 
     if (!studentForm.fullName.trim() || !studentForm.className.trim() || !studentForm.indexNumber.trim()) {
-      setMessage('Please fill Full Name, Class, and Index Number.');
+      toast.addToast('Please fill Full Name, Class, and Index Number.', 'error');
       return;
     }
 
@@ -101,7 +89,7 @@ export default function AdminDashboard() {
     const exists = students.some((student) => student.indexNumber === normalizedIndex);
 
     if (exists) {
-      setMessage('A student with this index number already exists.');
+      toast.addToast('A student with this index number already exists.', 'error');
       return;
     }
 
@@ -112,14 +100,14 @@ export default function AdminDashboard() {
       indexNumber: normalizedIndex,
     };
 
-    setStudents((prev) => [newStudent, ...prev]);
+    ctxAddStudent(newStudent);
     setStudentForm({ fullName: '', className: '', indexNumber: '' });
-    setMessage('Student added successfully.');
+    toast.addToast('Student added successfully.', 'success');
   };
 
   const deleteStudent = (id) => {
-    setStudents((prev) => prev.filter((student) => student.id !== id));
-    setMessage('Student removed.');
+    ctxDeleteStudent(id);
+    toast.addToast('Student removed.', 'info');
   };
 
   const onAttendanceFormChange = (e) => {
@@ -131,7 +119,7 @@ export default function AdminDashboard() {
     e.preventDefault();
 
     if (!attendanceForm.className || !attendanceForm.indexNumber.trim() || !attendanceForm.date) {
-      setMessage('Please fill Class, Index Number, and Date for attendance.');
+      toast.addToast('Please fill Class, Index Number, and Date for attendance.', 'error');
       return;
     }
 
@@ -144,7 +132,7 @@ export default function AdminDashboard() {
     );
 
     if (!hasStudent) {
-      setMessage('Student not found in selected class. Add the student first.');
+      toast.addToast('Student not found in selected class. Add the student first.', 'error');
       return;
     }
 
@@ -156,7 +144,7 @@ export default function AdminDashboard() {
     );
 
     if (alreadyMarked) {
-      setMessage('Attendance already marked for this student on selected date.');
+      toast.addToast('Attendance already marked for this student on selected date.', 'error');
       return;
     }
 
@@ -168,18 +156,18 @@ export default function AdminDashboard() {
       status: attendanceForm.status,
     };
 
-    setAttendance((prev) => [newEntry, ...prev]);
+    ctxAddAttendance(newEntry);
     setAttendanceForm((prev) => ({ ...prev, indexNumber: '', status: 'present' }));
-    setMessage('Attendance entry added successfully.');
+    toast.addToast('Attendance entry added successfully.', 'success');
   };
 
   const deleteAttendanceEntry = (id) => {
-    setAttendance((prev) => prev.filter((entry) => entry.id !== id));
-    setMessage('Attendance entry removed.');
+    ctxDeleteAttendance(id);
+    toast.addToast('Attendance entry removed.', 'info');
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-100 via-cyan-50 to-teal-100 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-cyan-50 to-teal-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <header className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -189,7 +177,7 @@ export default function AdminDashboard() {
             </div>
             <div className="flex flex-wrap gap-2">
               <Link
-                to="/"
+                to="/admin/students"
                 className="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-900 transition"
               >
                 Student Register
@@ -227,11 +215,7 @@ export default function AdminDashboard() {
           </article>
         </section>
 
-        {message && (
-          <section className="bg-white border border-cyan-200 text-cyan-800 rounded-xl p-3 text-sm font-medium">
-            {message}
-          </section>
-        )}
+        {/* Global toasts replace inline messages */}
 
         <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <article className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">

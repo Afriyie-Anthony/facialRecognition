@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
-import { initialAttendance, initialStudents } from './adminMockData';
+import { useAdminData } from '../../contexts/AdminDataContext';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function AttendancePage() {
-  const [attendance, setAttendance] = useState(initialAttendance);
+  const { attendance, addAttendance: ctxAddAttendance, deleteAttendance: ctxDeleteAttendance, students } = useAdminData();
+  const toast = useToast();
   const [form, setForm] = useState({
     className: '',
     indexNumber: '',
@@ -11,12 +13,8 @@ export default function AttendancePage() {
   });
   const [filterClass, setFilterClass] = useState('All');
   const [filterDate, setFilterDate] = useState('');
-  const [message, setMessage] = useState('');
 
-  const classOptions = useMemo(
-    () => Array.from(new Set(initialStudents.map((student) => student.className))).sort(),
-    []
-  );
+  const classOptions = useMemo(() => Array.from(new Set(students.map((s) => s.className))).sort(), [students]);
 
   const filteredAttendance = useMemo(() => {
     return attendance.filter((entry) => {
@@ -30,17 +28,17 @@ export default function AttendancePage() {
     e.preventDefault();
 
     if (!form.className || !form.indexNumber.trim() || !form.date) {
-      setMessage('Please fill all attendance fields.');
+      toast.addToast('Please fill all attendance fields.', 'error');
       return;
     }
 
     const normalizedIndex = form.indexNumber.trim().toUpperCase();
-    const hasStudent = initialStudents.some(
+    const hasStudent = students.some(
       (student) => student.className === form.className && student.indexNumber === normalizedIndex
     );
 
     if (!hasStudent) {
-      setMessage('Student not found in selected class.');
+      toast.addToast('Student not found in selected class.', 'error');
       return;
     }
 
@@ -52,37 +50,32 @@ export default function AttendancePage() {
     );
 
     if (alreadyExists) {
-      setMessage('Attendance already marked for this student on this date.');
+      toast.addToast('Attendance already marked for this student on this date.', 'error');
       return;
     }
 
-    setAttendance((prev) => [
-      {
-        id: crypto.randomUUID(),
-        className: form.className,
-        indexNumber: normalizedIndex,
-        date: form.date,
-        status: form.status,
-      },
-      ...prev,
-    ]);
+    ctxAddAttendance({
+      id: crypto.randomUUID(),
+      className: form.className,
+      indexNumber: normalizedIndex,
+      date: form.date,
+      status: form.status,
+    });
 
     setForm((prev) => ({ ...prev, indexNumber: '', status: 'present' }));
-    setMessage('Attendance entry added.');
-    setTimeout(() => setMessage(''), 3000);
+    toast.addToast('Attendance entry added.', 'success');
   };
 
   const deleteEntry = (id) => {
-    setAttendance((prev) => prev.filter((entry) => entry.id !== id));
-    setMessage('Attendance entry removed.');
-    setTimeout(() => setMessage(''), 3000);
+    ctxDeleteAttendance(id);
+    toast.addToast('Attendance entry removed.', 'info');
   };
 
   return (
     <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">Attendance Records</h2>
+          <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Attendance Records</h2>
           <p className="text-slate-500 mt-2 font-medium">Manage attendance logs by class, date, and student.</p>
         </div>
       </header>
@@ -139,7 +132,7 @@ export default function AttendancePage() {
           </div>
           <button
             type="submit"
-            className="w-full md:col-span-1 bg-linear-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-md shadow-emerald-500/20 transition-all hover:-translate-y-0.5"
+            className="w-full md:col-span-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-md shadow-emerald-500/20 transition-all hover:-translate-y-0.5"
           >
             Mark
           </button>
@@ -174,12 +167,7 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      {message && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl flex items-center gap-2 text-sm font-medium animate-in fade-in">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          {message}
-        </div>
-      )}
+      {/* global toast used for messages */}
 
       {/* Data Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">

@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
-import { initialStudents } from './adminMockData';
+import { useAdminData } from '../../contexts/AdminDataContext';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function StudentsPage() {
-  const [students, setStudents] = useState(initialStudents);
+  const { students, addStudent: ctxAddStudent, deleteStudent: ctxDeleteStudent } = useAdminData();
+  const toast = useToast();
   const [form, setForm] = useState({ fullName: '', className: '', indexNumber: '' });
   const [search, setSearch] = useState('');
   const [classFilter, setClassFilter] = useState('All');
-  const [message, setMessage] = useState('');
 
   const classOptions = useMemo(
     () => Array.from(new Set(students.map((student) => student.className))).sort(),
@@ -27,14 +28,14 @@ export default function StudentsPage() {
     e.preventDefault();
 
     if (!form.fullName.trim() || !form.className.trim() || !form.indexNumber.trim()) {
-      setMessage('Please complete all student fields.');
+      toast.addToast('Please complete all student fields.', 'error');
       return;
     }
 
     const normalizedIndex = form.indexNumber.trim().toUpperCase();
     const exists = students.some((student) => student.indexNumber === normalizedIndex);
     if (exists) {
-      setMessage('Index number already exists.');
+      toast.addToast('Index number already exists.', 'error');
       return;
     }
 
@@ -45,25 +46,21 @@ export default function StudentsPage() {
       indexNumber: normalizedIndex,
     };
 
-    setStudents((prev) => [newStudent, ...prev]);
+    ctxAddStudent(newStudent);
     setForm({ fullName: '', className: '', indexNumber: '' });
-    setMessage('Student added successfully.');
-    
-    // Auto-hide message
-    setTimeout(() => setMessage(''), 3000);
+    toast.addToast('Student added successfully.', 'success');
   };
 
   const deleteStudent = (id) => {
-    setStudents((prev) => prev.filter((student) => student.id !== id));
-    setMessage('Student removed.');
-    setTimeout(() => setMessage(''), 3000);
+    ctxDeleteStudent(id);
+    toast.addToast('Student removed.', 'info');
   };
 
   return (
     <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">Students Management</h2>
+          <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Students Management</h2>
           <p className="text-slate-500 mt-2 font-medium">Add, find, and manage all enrolled students.</p>
         </div>
       </header>
@@ -96,7 +93,7 @@ export default function StudentsPage() {
           />
           <button
             type="submit"
-            className="bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-md shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
+            className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-md shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
           >
             Add Student
           </button>
@@ -132,12 +129,7 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      {message && (
-        <div className="bg-indigo-50 border border-indigo-200 text-indigo-700 px-4 py-3 rounded-xl flex items-center gap-2 text-sm font-medium animate-in fade-in">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          {message}
-        </div>
-      )}
+      {/* global toasts are used for messages */}
 
       {/* Data Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">

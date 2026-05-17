@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import Webcam from "react-webcam";
+import AccessibleModal from '../components/AccessibleModal';
 
 export default function TakeAttendance() {
   const webcamRef = useRef(null);
@@ -87,8 +88,10 @@ export default function TakeAttendance() {
     setCapturedImage("");
   };
 
+  // modal refs removed; using AccessibleModal component
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-green-50 to-emerald-100 py-10 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-10 px-4">
       <div className="max-w-lg mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-8">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Take Attendance</h1>
         <p className="text-gray-600 mt-2 mb-6">Capture the student's face to mark attendance.</p>
@@ -134,36 +137,25 @@ export default function TakeAttendance() {
           <div className="mt-4 p-3 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 text-sm" aria-live="polite">{message}</div>
         )}
       </div>
-      {/* Popup modal for success / error */}
-      {(status === "success" || status === "error") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-md mx-4 bg-white rounded-lg shadow-xl p-6">
-            {status === "success" && result && (
-              <div>
-                <h2 className="text-xl font-semibold text-green-700 mb-2">Attendance Recorded</h2>
-                <div className="text-sm text-slate-700 mb-3">{result.name}</div>
-                <div className="text-sm text-slate-600">Index: {result.indexNumber}</div>
-                <div className="text-sm text-slate-600">Class: {result.studentClass}</div>
-                <div className="text-sm text-slate-600 mt-2">{formatDayTime(result.time).day} at {formatDayTime(result.time).time}</div>
-              </div>
-            )}
-
-            {status === "error" && (
-              <div>
-                <h2 className="text-xl font-semibold text-red-700 mb-2">Face Not Recognized</h2>
-                <div className="text-sm text-slate-700">{message}</div>
-              </div>
-            )}
-
-            <div className="mt-4 flex gap-3 justify-end">
-              {status === "error" && (
-                <button onClick={handleRetake} className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded">Retake</button>
-              )}
-              <button onClick={closePopup} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Close</button>
-            </div>
+      <AccessibleModal
+        open={status === 'success' || status === 'error'}
+        onClose={closePopup}
+        title={status === 'success' ? 'Attendance Recorded' : 'Face Not Recognized'}
+        description={status === 'success' ? result?.name : message}
+        actions={
+          status === 'error'
+            ? [{ label: 'Retake', onClick: handleRetake, variant: 'danger' }]
+            : []
+        }
+      >
+        {status === 'success' && result && (
+          <div>
+            <div className="text-sm text-slate-600">Index: {result.indexNumber}</div>
+            <div className="text-sm text-slate-600">Class: {result.studentClass}</div>
+            <div className="text-sm text-slate-600 mt-2">{formatDayTime(result.time).day} at {formatDayTime(result.time).time}</div>
           </div>
-        </div>
-      )}
+        )}
+      </AccessibleModal>
     </div>
   );
 }

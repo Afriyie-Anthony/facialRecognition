@@ -1,18 +1,20 @@
 import { useMemo } from 'react';
-import { initialAttendance, initialStudents } from './adminMockData';
+import { useAdminData } from '../../contexts/AdminDataContext';
 
 export default function AnalyticsPage() {
+  const { students, attendance } = useAdminData();
+
   const byClass = useMemo(() => {
     const classMap = new Map();
 
-    initialStudents.forEach((student) => {
+    students.forEach((student) => {
       if (!classMap.has(student.className)) {
         classMap.set(student.className, { total: 0, present: 0, absent: 0 });
       }
       classMap.get(student.className).total += 1;
     });
 
-    initialAttendance.forEach((entry) => {
+    attendance.forEach((entry) => {
       if (!classMap.has(entry.className)) {
         classMap.set(entry.className, { total: 0, present: 0, absent: 0 });
       }
@@ -25,13 +27,13 @@ export default function AnalyticsPage() {
       const rate = totalMarked > 0 ? Math.round((values.present / totalMarked) * 100) : 0;
       return { className, ...values, attendanceRate: rate };
     });
-  }, []);
+  }, [students, attendance]);
 
   return (
     <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">Analytics & Trends</h2>
+          <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Analytics & Trends</h2>
           <p className="text-slate-500 mt-2 font-medium">Review attendance rates and class-level performance metrics.</p>
         </div>
       </header>

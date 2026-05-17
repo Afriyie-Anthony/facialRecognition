@@ -20,7 +20,7 @@ export default function SettingsPage() {
     <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">System Settings</h2>
+          <h2 className="text-3xl font-bold text-slate-800 tracking-tight">System Settings</h2>
           <p className="text-slate-500 mt-2 font-medium">Configure global attendance limits and school preferences.</p>
         </div>
       </header>

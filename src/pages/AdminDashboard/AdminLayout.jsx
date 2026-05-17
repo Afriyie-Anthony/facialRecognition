@@ -17,7 +17,7 @@ export default function AdminLayout() {
         {/* Sidebar */}
         <aside className="w-full lg:w-72 bg-slate-900 text-slate-300 lg:fixed lg:h-screen lg:overflow-y-auto flex flex-col shadow-2xl z-20 transition-all duration-300">
           <div className="p-6 md:p-8 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
@@ -38,7 +38,7 @@ export default function AdminLayout() {
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
                       isActive
-                        ? 'bg-linear-to-r from-indigo-600/20 to-violet-600/10 text-indigo-400 border border-indigo-500/20 shadow-inner'
+                        ? 'bg-gradient-to-r from-indigo-600/20 to-violet-600/10 text-indigo-400 border border-indigo-500/20 shadow-inner'
                         : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                     }`
                   }
@@ -58,11 +58,11 @@ export default function AdminLayout() {
               <p className="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Quick Actions</p>
               <div className="space-y-2">
                 <NavLink
-                  to="/"
+                  to="/admin/students"
                   className="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors py-1 hover:translate-x-1 transform duration-200"
                 >
                   <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                  Go to Register
+                  Manage Students
                 </NavLink>
                 <NavLink
                   to="/takeattendance"
