@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAdminData } from '../../contexts/AdminDataContext';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -160,13 +161,33 @@ export default function StudentsPage() {
                     </td>
                     <td className="px-6 py-4 text-slate-600 font-mono text-xs">{student.indexNumber}</td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        type="button"
-                        onClick={() => deleteStudent(student.id)}
-                        className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg font-medium transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        Delete
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          to={`/admin/students/${student.id}`}
+                          className="text-slate-400 hover:text-indigo-600 px-2 py-1 rounded-lg font-medium transition-colors"
+                        >
+                          View
+                        </Link>
+                        <Link
+                          to={`/admin/students/${student.id}/edit`}
+                          className="text-slate-400 hover:text-emerald-600 px-2 py-1 rounded-lg font-medium transition-colors"
+                        >
+                          Edit
+                        </Link>
+                        <Link
+                          to={`/admin/students/${student.id}/attendance`}
+                          className="text-slate-400 hover:text-cyan-600 px-2 py-1 rounded-lg font-medium transition-colors"
+                        >
+                          Attendance
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => deleteStudent(student.id)}
+                          className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 px-2 py-1.5 rounded-lg font-medium transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
