@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAdminData } from '../../contexts/AdminDataContext';
 import { useToast } from '../../contexts/ToastContext';
 
 export default function StudentsPage() {
-  const { students, addStudent: ctxAddStudent, deleteStudent: ctxDeleteStudent } = useAdminData();
+  const { students, deleteStudent: ctxDeleteStudent } = useAdminData();
   const toast = useToast();
-  const [form, setForm] = useState({ fullName: '', className: '', indexNumber: '' });
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [classFilter, setClassFilter] = useState('All');
 
@@ -25,33 +25,6 @@ export default function StudentsPage() {
     });
   }, [students, search, classFilter]);
 
-  const addStudent = (e) => {
-    e.preventDefault();
-
-    if (!form.fullName.trim() || !form.className.trim() || !form.indexNumber.trim()) {
-      toast.addToast('Please complete all student fields.', 'error');
-      return;
-    }
-
-    const normalizedIndex = form.indexNumber.trim().toUpperCase();
-    const exists = students.some((student) => student.indexNumber === normalizedIndex);
-    if (exists) {
-      toast.addToast('Index number already exists.', 'error');
-      return;
-    }
-
-    const newStudent = {
-      id: crypto.randomUUID(),
-      fullName: form.fullName.trim(),
-      className: form.className.trim(),
-      indexNumber: normalizedIndex,
-    };
-
-    ctxAddStudent(newStudent);
-    setForm({ fullName: '', className: '', indexNumber: '' });
-    toast.addToast('Student added successfully.', 'success');
-  };
-
   const deleteStudent = (id) => {
     ctxDeleteStudent(id);
     toast.addToast('Student removed.', 'info');
@@ -62,44 +35,18 @@ export default function StudentsPage() {
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Students Management</h2>
-          <p className="text-slate-500 mt-2 font-medium">Add, find, and manage all enrolled students.</p>
+          <p className="text-slate-500 mt-2 font-medium">View, edit, and manage all enrolled students.</p>
         </div>
+        <button
+          onClick={() => navigate('/admin/students/add')}
+          className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold py-2.5 px-6 rounded-xl shadow-md shadow-indigo-500/20 transition-all hover:-translate-y-0.5 w-full md:w-auto justify-center"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Register New Student
+        </button>
       </header>
-
-      {/* Add Student Form */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
-        <h3 className="text-lg font-bold text-slate-800 mb-4">Register New Student</h3>
-        <form onSubmit={addStudent} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input
-            type="text"
-            value={form.fullName}
-            onChange={(e) => setForm((prev) => ({ ...prev, fullName: e.target.value }))}
-            placeholder="Full Name (e.g., John Doe)"
-            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all w-full text-slate-700"
-          />
-          <input
-            type="text"
-            value={form.className}
-            onChange={(e) => setForm((prev) => ({ ...prev, className: e.target.value }))}
-            placeholder="Class (e.g., Form 1 A)"
-            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all w-full text-slate-700"
-          />
-          <input
-            type="text"
-            value={form.indexNumber}
-            onChange={(e) => setForm((prev) => ({ ...prev, indexNumber: e.target.value }))}
-            placeholder="Index (e.g., STU001)"
-            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all w-full text-slate-700"
-          />
-          <button
-            type="submit"
-            className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-md shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
-          >
-            Add Student
-          </button>
-        </form>
-      </div>
 
       {/* Filters & Search */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
