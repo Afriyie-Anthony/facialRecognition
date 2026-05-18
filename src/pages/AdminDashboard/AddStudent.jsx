@@ -74,28 +74,28 @@ export default function RegisterNewStudent() {
   };
 
   return (
-    <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <header className="mb-8">
-        <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Register New Student</h2>
-        <p className="text-slate-500 mt-2 font-medium">Add a new student to the system. All fields are required.</p>
+    <section className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 px-4 sm:px-0">
+      <header className="mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 tracking-tight">Register New Student</h2>
+        <p className="text-sm sm:text-base text-slate-500 mt-2 font-medium">Add a new student to the system. All fields are required.</p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Form Section */}
         <div className="lg:col-span-2">
-          <form onSubmit={submit} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
+          <form onSubmit={submit} className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 to-violet-600"></div>
 
-            <div className="space-y-3">
+            <div className="space-y-4 sm:space-y-6">
               {/* Full Name */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Full Name</label>
+                <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-2">Full Name</label>
                 <input
                   type="text"
                   value={form.fullName}
                   onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
                   placeholder="e.g., John Doe"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700"
+                  className="w-full px-4 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700 text-sm sm:text-base"
                   disabled={loading}
                 />
                 <p className="text-xs text-slate-500 mt-1">Student's full name as it appears in records</p>
@@ -103,13 +103,13 @@ export default function RegisterNewStudent() {
 
               {/* Class */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Class</label>
+                <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-2">Class</label>
                 <input
                   type="text"
                   value={form.className}
                   onChange={(e) => setForm((p) => ({ ...p, className: e.target.value }))}
                   placeholder="e.g., Form 1 A"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700"
+                  className="w-full px-4 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700 text-sm sm:text-base"
                   disabled={loading}
                 />
                 <p className="text-xs text-slate-500 mt-1">Student's class or form</p>
@@ -117,23 +117,23 @@ export default function RegisterNewStudent() {
 
               {/* Index Number */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Student ID / Index Number</label>
+                <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-2">Student ID / Index Number</label>
                 <input
                   type="text"
                   value={form.indexNumber}
                   onChange={(e) => setForm((p) => ({ ...p, indexNumber: e.target.value }))}
                   placeholder="e.g., STU001"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700 uppercase"
+                  className="w-full px-4 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700 uppercase text-sm sm:text-base"
                   disabled={loading}
                 />
                 <p className="text-xs text-slate-500 mt-1">Unique identifier (automatically converted to uppercase)</p>
               </div>
 
               {/* Face Capture Section */}
-              <div className="border-t pt-6">
-                <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <div className="border-t pt-4 sm:pt-6">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                  <svg className="w-4 sm:w-5 h-4 sm:h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0118.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   Student Face <span className="text-xs text-slate-500 font-normal">(Optional)</span>

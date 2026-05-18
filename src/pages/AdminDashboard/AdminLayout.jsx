@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 
 const navItems = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
@@ -10,31 +11,61 @@ const navItems = [
 ];
 
 export default function AdminLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  // Close sidebar when route changes
+  const handleNavClick = () => {
+    setSidebarOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-500 selection:text-white">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs lg:hidden z-10 transition-opacity duration-200"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <div className="flex flex-col lg:flex-row min-h-screen">
         
         {/* Sidebar */}
-        <aside className="w-full lg:w-72 bg-slate-900 text-slate-300 lg:fixed lg:h-screen lg:overflow-y-auto flex flex-col shadow-2xl z-20 transition-all duration-300">
-          <div className="p-6 md:p-8 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        <aside className={`fixed top-0 left-0 lg:static w-64 lg:w-72 bg-slate-900 text-slate-300 h-screen lg:h-auto flex flex-col shadow-2xl z-20 transition-transform duration-300 ease-in-out transform ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
+          <div className="p-4 sm:p-6 md:p-8 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight truncate">Admin<span className="text-indigo-400">Panel</span></h1>
+                <p className="text-xs text-slate-500 font-medium">Facial Recognition</p>
+              </div>
+            </div>
+            {/* Close button on mobile */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden flex-shrink-0 p-2 hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">Admin<span className="text-indigo-400">Panel</span></h1>
-              <p className="text-xs text-slate-500 font-medium">Facial Recognition System</p>
-            </div>
+            </button>
           </div>
 
-          <div className="px-4 py-2 flex-grow">
+          <div className="px-4 py-2 flex-grow overflow-y-auto">
             <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Main Menu</p>
             <nav className="space-y-1.5">
               {navItems.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
+                  onClick={handleNavClick}
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
                       isActive
@@ -43,33 +74,35 @@ export default function AdminLayout() {
                     }`
                   }
                 >
-                  <svg className="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
                     {item.label === 'Settings' && <circle cx="12" cy="12" r="3" />}
                   </svg>
-                  {item.label}
+                  <span className="truncate">{item.label}</span>
                 </NavLink>
               ))}
             </nav>
           </div>
 
-          <div className="p-6 mt-auto">
+          <div className="p-4 sm:p-6 mt-auto border-t border-slate-800">
             <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50 backdrop-blur-xs">
               <p className="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Quick Actions</p>
               <div className="space-y-2">
                 <NavLink
                   to="/admin/students"
+                  onClick={handleNavClick}
                   className="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors py-1 hover:translate-x-1 transform duration-200"
                 >
-                  <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                  Manage Students
+                  <svg className="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+                  <span className="truncate">Manage Students</span>
                 </NavLink>
                 <NavLink
                   to="/takeattendance"
+                  onClick={handleNavClick}
                   className="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors py-1 hover:translate-x-1 transform duration-200"
                 >
-                  <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                  Take Attendance
+                  <svg className="w-4 h-4 text-cyan-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                  <span className="truncate">Take Attendance</span>
                 </NavLink>
               </div>
             </div>
@@ -77,7 +110,29 @@ export default function AdminLayout() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 lg:ml-72 min-h-screen">
+        <main className="flex-1 w-full lg:ml-0 min-h-screen">
+          {/* Header with hamburger button */}
+          <div className="lg:hidden sticky top-0 z-10 bg-white border-b border-slate-200 shadow-sm">
+            <div className="flex items-center justify-between px-4 py-3">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <svg className="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <span className="text-sm font-semibold text-slate-800">Admin</span>
+              </div>
+            </div>
+          </div>
+
           <div className="p-4 md:p-8 max-w-7xl mx-auto">
             <Outlet />
           </div>
