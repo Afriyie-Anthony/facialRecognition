@@ -32,7 +32,7 @@ export default function AdminLayout() {
       <div className="flex flex-col lg:flex-row min-h-screen">
         
         {/* Sidebar */}
-        <aside className={`fixed top-0 left-0 lg:static w-64 lg:w-72 bg-slate-900 text-slate-300 h-screen lg:h-auto flex flex-col shadow-2xl z-20 transition-transform duration-300 ease-in-out transform ${
+        <aside className={`fixed top-0 left-0 w-64 lg:w-72 bg-slate-900 text-slate-300 h-screen flex flex-col shadow-2xl z-20 transition-transform duration-300 ease-in-out transform ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}>
           <div className="p-4 sm:p-6 md:p-8 flex items-center justify-between gap-3">
@@ -97,7 +97,7 @@ export default function AdminLayout() {
                   <span className="truncate">Manage Students</span>
                 </NavLink>
                 <NavLink
-                  to="/takeattendance"
+                  to="/"
                   onClick={handleNavClick}
                   className="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors py-1 hover:translate-x-1 transform duration-200"
                 >
@@ -110,7 +110,7 @@ export default function AdminLayout() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 w-full lg:ml-0 min-h-screen">
+        <main className="flex-1 w-full lg:pl-72 min-h-screen">
           {/* Header with hamburger button */}
           <div className="lg:hidden sticky top-0 z-10 bg-white border-b border-slate-200 shadow-sm">
             <div className="flex items-center justify-between px-4 py-3">
