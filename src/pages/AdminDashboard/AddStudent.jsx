@@ -5,12 +5,12 @@ import { useAdminData } from '../../contexts/AdminDataContext';
 import { useToast } from '../../contexts/ToastContext';
 
 export default function RegisterNewStudent() {
-  const { addStudent, students } = useAdminData();
+  const { addStudent, students, classes } = useAdminData();
   const toast = useToast();
   const navigate = useNavigate();
   const webcamRef = useRef(null);
 
-  const [form, setForm] = useState({ fullName: '', className: '', indexNumber: '' });
+  const [form, setForm] = useState({ fullName: '', classId: '', indexNumber: '' });
   const [loading, setLoading] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
   const [capturedFace, setCapturedFace] = useState(null);
@@ -41,7 +41,7 @@ export default function RegisterNewStudent() {
     e.preventDefault();
     setLoading(true);
 
-    if (!form.fullName.trim() || !form.className.trim() || !form.indexNumber.trim()) {
+    if (!form.fullName.trim() || !form.classId || !form.indexNumber.trim()) {
       toast.addToast('Please complete all student fields.', 'error');
       setLoading(false);
       return;
@@ -58,13 +58,13 @@ export default function RegisterNewStudent() {
     addStudent({
       id: crypto.randomUUID(),
       fullName: form.fullName.trim(),
-      className: form.className.trim(),
+      classId: form.classId,
       indexNumber: normalizedIndex,
       faceData: capturedFace, // Store the face image
     });
 
     toast.addToast('Student registered successfully!', 'success');
-    setForm({ fullName: '', className: '', indexNumber: '' });
+    setForm({ fullName: '', classId: '', indexNumber: '' });
     setCapturedFace(null);
     setCameraActive(false);
     setTimeout(() => {
@@ -104,14 +104,17 @@ export default function RegisterNewStudent() {
               {/* Class */}
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-2">Class</label>
-                <input
-                  type="text"
-                  value={form.className}
-                  onChange={(e) => setForm((p) => ({ ...p, className: e.target.value }))}
-                  placeholder="e.g., Form 1 A"
-                  className="w-full px-4 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700 text-sm sm:text-base"
+                <select
+                  value={form.classId}
+                  onChange={(e) => setForm((p) => ({ ...p, classId: e.target.value }))}
+                  className="w-full px-4 py-2 sm:py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-slate-700 text-sm sm:text-base appearance-none"
                   disabled={loading}
-                />
+                >
+                  <option value="" disabled>Select a class...</option>
+                  {classes.map((cls) => (
+                    <option key={cls.id} value={cls.id}>{cls.name}</option>
+                  ))}
+                </select>
                 <p className="text-xs text-slate-500 mt-1">Student's class or form</p>
               </div>
 

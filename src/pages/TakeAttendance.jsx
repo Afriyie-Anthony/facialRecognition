@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import Webcam from "react-webcam";
+import { Link } from "react-router-dom";
 import AccessibleModal from '../components/AccessibleModal';
+import { attendanceAPI } from '../services/endpoints';
 
 export default function TakeAttendance() {
   const webcamRef = useRef(null);
@@ -14,31 +16,6 @@ export default function TakeAttendance() {
     const day = d.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
     const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     return { day, time };
-  };
-
-  // Try backend recognition, fallback to a local stub
-  const recognizeFace = async (imageBase64) => {
-    try {
-      const res = await fetch("/api/recognize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: imageBase64 }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.found) return { name: data.name, indexNumber: data.indexNumber, studentClass: data.studentClass };
-        return null;
-      }
-    } catch (e) {
-      // ignore and fallback to stub
-    }
-
-    // Local stub: deterministic pseudo-recognition using image length parity
-    const hash = imageBase64.length;
-    if (hash % 2 === 0) {
-      return { name: "John Doe", indexNumber: "STU001", studentClass: "Form 1 A" };
-    }
-    return null;
   };
 
   const captureAndRecognize = async () => {
@@ -61,16 +38,30 @@ export default function TakeAttendance() {
     setCapturedImage(image);
     setStatus("loading");
 
-    const person = await recognizeFace(image);
-    const now = new Date().toISOString();
-    if (person) {
-      setResult({ ...person, time: now });
-      setStatus("success");
-      setMessage("Face recognized. Attendance recorded.");
-    } else {
+    try {
+      const res = await attendanceAPI.take({ imageBase64: image });
+      const data = res.data;
+      
+      const now = new Date().toISOString();
+      if (data.success || data.alreadyMarked) {
+        setResult({
+          name: data.student?.name || "Student",
+          indexNumber: data.student?.student_id || "Unknown",
+          studentClass: data.student?.class_name || "Unknown",
+          time: now
+        });
+        setStatus("success");
+        setMessage(data.message || "Attendance recorded.");
+      } else {
+        setResult(null);
+        setStatus("error");
+        setMessage("Face not recognized. Please try again or register the student.");
+      }
+    } catch (e) {
       setResult(null);
       setStatus("error");
-      setMessage("Face not recognized. Please try again or register the student.");
+      const errMsg = e.response?.data?.error || "Error taking attendance. Please try again.";
+      setMessage(errMsg);
     }
   };
 
@@ -91,8 +82,17 @@ export default function TakeAttendance() {
   // modal refs removed; using AccessibleModal component
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-10 px-4">
-      <div className="max-w-lg mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-10 px-4 relative">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-8">
+        <Link 
+          to="/login" 
+          className="bg-white/80 backdrop-blur-sm border border-emerald-200 text-emerald-800 hover:bg-emerald-50 px-4 py-2 rounded-xl font-semibold shadow-sm transition-all text-sm flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+          Admin Login
+        </Link>
+      </div>
+      <div className="max-w-lg mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-8 mt-8 sm:mt-0">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Take Attendance</h1>
         <p className="text-gray-600 mt-2 mb-6">Capture the student's face to mark attendance.</p>
 

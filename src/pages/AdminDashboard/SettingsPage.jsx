@@ -1,20 +1,63 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { settingsAPI } from '../../services/endpoints';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function SettingsPage() {
+  const toast = useToast();
   const [settings, setSettings] = useState({
-    schoolName: 'Springfield Senior High',
+    schoolName: '',
     defaultClassSession: 'Morning',
     attendanceCutoffTime: '09:00',
     allowLateMarking: true,
   });
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
 
-  const saveSettings = (e) => {
-    e.preventDefault();
-    console.log('Settings saved:', settings);
-    setMessage('Settings saved successfully.');
-    setTimeout(() => setMessage(''), 3000);
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const res = await settingsAPI.get();
+      const data = res.data;
+      if (data && Object.keys(data).length > 0) {
+        setSettings({
+          schoolName: data.school_name || '',
+          defaultClassSession: data.default_session || 'Morning',
+          // MySQL returns TIME columns with seconds (e.g. 09:00:00). Input type="time" prefers HH:mm.
+          attendanceCutoffTime: data.cutoff_time ? data.cutoff_time.slice(0, 5) : '09:00',
+          allowLateMarking: Boolean(data.allow_late_marking),
+        });
+      }
+    } catch (error) {
+      toast.addToast('Failed to load settings', 'error');
+    } finally {
+      setFetching(false);
+    }
   };
+
+  const saveSettings = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await settingsAPI.update({
+        schoolName: settings.schoolName,
+        defaultSession: settings.defaultClassSession,
+        cutoffTime: settings.attendanceCutoffTime,
+        allowLateMarking: settings.allowLateMarking
+      });
+      toast.addToast('Settings saved successfully.', 'success');
+    } catch (error) {
+      toast.addToast('Failed to save settings.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (fetching) {
+    return <p className="p-4 text-slate-500">Loading settings...</p>;
+  }
 
   return (
     <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl">
@@ -84,18 +127,14 @@ export default function SettingsPage() {
             </div>
 
             <div className="pt-6 mt-6 flex items-center justify-between">
-              {message ? (
-                <div className="text-sm font-medium text-emerald-600 flex items-center gap-2 animate-in fade-in">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                  {message}
-                </div>
-              ) : <div></div>}
+              <div></div>
               
               <button
                 type="submit"
-                className="bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-8 rounded-xl shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5"
+                disabled={loading}
+                className="bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-8 rounded-xl shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5 disabled:opacity-50"
               >
-                Save Settings
+                {loading ? 'Saving...' : 'Save Settings'}
               </button>
             </div>
           </form>
