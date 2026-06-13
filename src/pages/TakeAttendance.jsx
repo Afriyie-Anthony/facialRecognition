@@ -48,7 +48,8 @@ export default function TakeAttendance() {
           name: data.student?.name || "Student",
           indexNumber: data.student?.student_id || "Unknown",
           studentClass: data.student?.class_name || "Unknown",
-          time: now
+          time: now,
+          attendanceStatus: data.status || 'present'
         });
         setStatus("success");
         setMessage(data.message || "Attendance recorded.");
@@ -119,8 +120,13 @@ export default function TakeAttendance() {
                 (() => {
                   const { day, time } = formatDayTime(result.time);
                   return (
-                    <div className="p-3 rounded-lg border border-green-200 bg-green-50 text-green-800 text-sm">
-                      <div className="font-semibold text-lg">{result.name}</div>
+                    <div className={`p-3 rounded-lg border text-sm ${result.attendanceStatus === 'late' ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-green-200 bg-green-50 text-green-800'}`}>
+                      <div className="font-semibold text-lg flex items-center justify-between">
+                        {result.name}
+                        {result.attendanceStatus === 'late' && (
+                          <span className="text-xs px-2 py-1 bg-amber-200 text-amber-900 rounded-full ml-2">Late</span>
+                        )}
+                      </div>
                       <div className="text-sm">Index: {result.indexNumber}</div>
                       <div className="text-sm">Class: {result.studentClass}</div>
                       <div className="text-sm mt-2">{day} at {time}</div>
@@ -140,7 +146,7 @@ export default function TakeAttendance() {
       <AccessibleModal
         open={status === 'success' || status === 'error'}
         onClose={closePopup}
-        title={status === 'success' ? 'Attendance Recorded' : 'Face Not Recognized'}
+        title={status === 'success' ? (result?.attendanceStatus === 'late' ? 'Attendance Recorded (Late)' : 'Attendance Recorded') : 'Face Not Recognized'}
         description={status === 'success' ? result?.name : message}
         actions={
           status === 'error'
@@ -153,6 +159,12 @@ export default function TakeAttendance() {
             <div className="text-sm text-slate-600">Index: {result.indexNumber}</div>
             <div className="text-sm text-slate-600">Class: {result.studentClass}</div>
             <div className="text-sm text-slate-600 mt-2">{formatDayTime(result.time).day} at {formatDayTime(result.time).time}</div>
+            {result.attendanceStatus === 'late' && (
+              <div className="mt-3 p-2 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                Marked as Late
+              </div>
+            )}
           </div>
         )}
       </AccessibleModal>

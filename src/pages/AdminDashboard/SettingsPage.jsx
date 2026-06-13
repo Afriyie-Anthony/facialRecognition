@@ -56,7 +56,11 @@ export default function SettingsPage() {
   };
 
   if (fetching) {
-    return <p className="p-4 text-slate-500">Loading settings...</p>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
   }
 
   return (
@@ -86,14 +90,13 @@ export default function SettingsPage() {
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700">Default Session</label>
-                <select
+                <input
+                  type="text"
                   value={settings.defaultClassSession}
                   onChange={(e) => setSettings((prev) => ({ ...prev, defaultClassSession: e.target.value }))}
+                  placeholder="e.g. 2025/2026"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-800"
-                >
-                  <option value="Morning">Morning</option>
-                  <option value="Afternoon">Afternoon</option>
-                </select>
+                />
               </div>
 
               <div className="space-y-2">

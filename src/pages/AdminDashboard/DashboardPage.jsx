@@ -233,10 +233,12 @@ export default function DashboardPage() {
                     className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 ${
                       record.status === 'present'
                         ? 'bg-emerald-100 text-emerald-700'
+                        : record.status === 'late'
+                        ? 'bg-amber-100 text-amber-700'
                         : 'bg-rose-100 text-rose-700'
                     }`}
                   >
-                    {record.status === 'present' ? '✓ Present' : '✗ Absent'}
+                    {record.status === 'present' ? '✓ Present' : record.status === 'late' ? '⚠ Late' : '✗ Absent'}
                   </span>
                 </div>
               ))}
