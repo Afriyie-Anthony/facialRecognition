@@ -109,7 +109,7 @@ export default function AnalyticsPage() {
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm">
           <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-4">Attendance Trend</h3>
           {dailyTrend.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={dailyTrend}>
                 <defs>
                   <linearGradient id="colorPresent" x1="0" y1="0" x2="0" y2="1">
@@ -137,7 +137,7 @@ export default function AnalyticsPage() {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-250 flex items-center justify-center text-slate-500">
+            <div className="h-[200px] flex items-center justify-center text-slate-500">
               <p className="text-sm">No data available</p>
             </div>
           )}
@@ -147,7 +147,7 @@ export default function AnalyticsPage() {
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm">
           <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-4">Class Performance</h3>
           {attendanceDistribution.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart data={attendanceDistribution}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="name" stroke="#64748b" style={{ fontSize: '12px' }} />
@@ -171,7 +171,7 @@ export default function AnalyticsPage() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-250 flex items-center justify-center text-slate-500">
+            <div className="h-[200px] flex items-center justify-center text-slate-500">
               <p className="text-sm">No data available</p>
             </div>
           )}
