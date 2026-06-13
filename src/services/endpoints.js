@@ -19,6 +19,7 @@ export const attendanceAPI = {
   take: (data) => api.post('/attendance/take', data),
   getAll: (params) => api.get('/attendance', { params }),
   getDashboardStats: () => api.get('/attendance/dashboard-stats'),
+  getAnalyticsStats: (params) => api.get('/attendance/analytics-stats', { params }),
   delete: (id) => api.delete(`/attendance/${id}`),
 };
 

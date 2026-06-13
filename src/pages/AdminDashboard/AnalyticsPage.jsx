@@ -1,95 +1,51 @@
-import { useMemo, useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   BarChart, Bar, LineChart, Line, AreaChart, Area, ScatterChart, Scatter,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
 } from 'recharts';
-import { useAdminData } from '../../contexts/AdminDataContext';
+import { attendanceAPI } from '../../services/endpoints';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function AnalyticsPage() {
-  const { students, attendance } = useAdminData();
+  const toast = useToast();
   const [dateRange, setDateRange] = useState('all');
+  const [loading, setLoading] = useState(true);
+  
+  const [data, setData] = useState({
+    overallStats: { totalPresent: 0, totalAbsent: 0, totalRecords: 0, overallRate: 0 },
+    byClass: [],
+    dailyTrend: [],
+    topPerformers: [],
+    bottomPerformers: [],
+    attendanceDistribution: []
+  });
 
-  // Filter attendance based on date range
-  const filteredAttendance = useMemo(() => {
-    if (dateRange === 'all') return attendance;
-    
-    const now = new Date();
-    const filterDate = new Date();
-    
-    if (dateRange === '7days') filterDate.setDate(now.getDate() - 7);
-    if (dateRange === '30days') filterDate.setDate(now.getDate() - 30);
-    
-    return attendance.filter(entry => new Date(entry.date) >= filterDate);
-  }, [attendance, dateRange]);
-
-  // Analytics by class
-  const byClass = useMemo(() => {
-    const classMap = new Map();
-
-    students.forEach((student) => {
-      if (!classMap.has(student.className)) {
-        classMap.set(student.className, { total: 0, present: 0, absent: 0 });
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      setLoading(true);
+      try {
+        const response = await attendanceAPI.getAnalyticsStats({ range: dateRange });
+        setData(response.data);
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+        toast.addToast('Failed to load analytics data', 'error');
+      } finally {
+        setLoading(false);
       }
-      classMap.get(student.className).total += 1;
-    });
+    };
 
-    filteredAttendance.forEach((entry) => {
-      if (!classMap.has(entry.className)) {
-        classMap.set(entry.className, { total: 0, present: 0, absent: 0 });
-      }
-      if (entry.status === 'present') classMap.get(entry.className).present += 1;
-      if (entry.status === 'absent') classMap.get(entry.className).absent += 1;
-    });
+    fetchAnalytics();
+  }, [dateRange, toast]);
 
-    return Array.from(classMap.entries()).map(([className, values]) => {
-      const totalMarked = values.present + values.absent;
-      const rate = totalMarked > 0 ? Math.round((values.present / totalMarked) * 100) : 0;
-      return { className, ...values, attendanceRate: rate, totalMarked };
-    }).sort((a, b) => b.attendanceRate - a.attendanceRate);
-  }, [students, filteredAttendance]);
+  const { overallStats, byClass, dailyTrend, topPerformers, bottomPerformers, attendanceDistribution } = data;
 
-  // Overall statistics
-  const overallStats = useMemo(() => {
-    const totalPresent = filteredAttendance.filter(e => e.status === 'present').length;
-    const totalAbsent = filteredAttendance.filter(e => e.status === 'absent').length;
-    const totalRecords = totalPresent + totalAbsent;
-    const overallRate = totalRecords > 0 ? Math.round((totalPresent / totalRecords) * 100) : 0;
-    
-    return { totalPresent, totalAbsent, totalRecords, overallRate };
-  }, [filteredAttendance]);
-
-  // Daily attendance trend
-  const dailyTrend = useMemo(() => {
-    const dateMap = {};
-    filteredAttendance.forEach(entry => {
-      if (!dateMap[entry.date]) {
-        dateMap[entry.date] = { date: entry.date, present: 0, absent: 0, rate: 0 };
-      }
-      if (entry.status === 'present') dateMap[entry.date].present++;
-      else dateMap[entry.date].absent++;
-    });
-
-    return Object.values(dateMap)
-      .map(day => ({
-        ...day,
-        rate: day.present + day.absent > 0 
-          ? Math.round((day.present / (day.present + day.absent)) * 100)
-          : 0
-      }))
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
-  }, [filteredAttendance]);
-
-  // Top and bottom performers
-  const topPerformers = useMemo(() => byClass.slice(0, 3), [byClass]);
-  const bottomPerformers = useMemo(() => byClass.slice(-3).reverse(), [byClass]);
-
-  // Attendance distribution chart data
-  const attendanceDistribution = useMemo(() => {
-    return byClass.map(item => ({
-      name: item.className,
-      attendance: item.attendanceRate,
-    }));
-  }, [byClass]);
+  if (loading && !data.byClass.length) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <section className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 px-4 sm:px-0">
