@@ -1,20 +1,64 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { authAPI } from '../../services/endpoints';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function ProfilePage() {
+  const toast = useToast();
   const [profile, setProfile] = useState({
-    fullName: 'School Admin',
-    email: 'admin@school.edu',
-    phone: '+233 20 000 0000',
-    role: 'Administrator',
+    fullName: '',
+    email: '',
+    phone: '',
+    role: '',
   });
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const updateProfile = (e) => {
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await authAPI.getProfile();
+        const data = response.data;
+        setProfile({
+          fullName: data.full_name || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          role: data.role || 'Administrator',
+        });
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        toast.addToast('Failed to load profile details', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [toast]);
+
+  const updateProfile = async (e) => {
     e.preventDefault();
-    console.log('Profile updated:', profile);
-    setMessage('Profile updated successfully.');
-    setTimeout(() => setMessage(''), 3000);
+    setSaving(true);
+    try {
+      await authAPI.updateProfile({
+        fullName: profile.fullName,
+        email: profile.email,
+        phone: profile.phone
+      });
+      toast.addToast('Profile updated successfully', 'success');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.addToast('Failed to update profile', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl">
@@ -35,7 +79,7 @@ export default function ProfilePage() {
         <div className="px-6 md:px-8 pb-8 relative">
           <div className="relative -mt-16 mb-6 flex items-end justify-between">
             <div className="w-32 h-32 rounded-2xl border-4 border-white bg-slate-100 shadow-md flex items-center justify-center text-4xl font-bold text-slate-400">
-               {profile.fullName.charAt(0)}
+               {profile.fullName ? profile.fullName.charAt(0).toUpperCase() : 'A'}
             </div>
           </div>
 
@@ -49,6 +93,7 @@ export default function ProfilePage() {
                   value={profile.fullName}
                   onChange={(e) => setProfile((prev) => ({ ...prev, fullName: e.target.value }))}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-800"
+                  required
                 />
               </div>
 
@@ -59,6 +104,7 @@ export default function ProfilePage() {
                   value={profile.email}
                   onChange={(e) => setProfile((prev) => ({ ...prev, email: e.target.value }))}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-800"
+                  required
                 />
               </div>
 
@@ -84,19 +130,13 @@ export default function ProfilePage() {
 
             </div>
 
-            <div className="pt-6 mt-6 flex items-center justify-between border-t border-slate-100">
-              {message ? (
-                <div className="text-sm font-medium text-emerald-600 flex items-center gap-2 animate-in fade-in">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                  {message}
-                </div>
-              ) : <div></div>}
-              
+            <div className="pt-6 mt-6 flex items-center justify-end border-t border-slate-100">
               <button
                 type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5"
+                disabled={saving}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                Update Profile
+                {saving ? 'Updating...' : 'Update Profile'}
               </button>
             </div>
           </form>
