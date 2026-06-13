@@ -41,7 +41,17 @@ export function AdminDataProvider({ children }) {
         faceEnrolled: s.face_enrolled
       }));
       setStudents(mappedStudents);
-      setAttendance(attendanceRes.data);
+
+      const mappedAttendance = attendanceRes.data.map(a => ({
+        id: a.id,
+        className: a.class_name || 'Unknown',
+        studentName: a.student_name || '',
+        indexNumber: a.student_id || '',
+        date: a.attendance_date ? a.attendance_date.split('T')[0] : '',
+        time: a.created_at ? new Date(a.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+        status: a.status || 'present',
+      }));
+      setAttendance(mappedAttendance);
       setClasses(classesRes.data);
     } catch (error) {
       console.error('Failed to fetch admin data', error);
@@ -150,7 +160,15 @@ export function AdminDataProvider({ children }) {
   };
 
   const addAttendance = (entry) => setAttendance((prev) => [entry, ...prev]);
-  const deleteAttendance = (id) => setAttendance((prev) => prev.filter((e) => e.id !== id));
+  const deleteAttendance = async (id) => {
+    try {
+      await attendanceAPI.delete(id);
+      setAttendance((prev) => prev.filter((e) => e.id !== id));
+      toast.addToast('Attendance record deleted', 'success');
+    } catch (error) {
+      toast.addToast('Failed to delete attendance record', 'error');
+    }
+  };
 
   return (
     <AdminDataContext.Provider

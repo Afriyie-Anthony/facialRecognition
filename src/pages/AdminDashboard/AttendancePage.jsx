@@ -175,9 +175,11 @@ export default function AttendancePage() {
           <table className="w-full text-sm text-left">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-xs font-semibold">
               <tr>
-                <th className="px-6 py-4">Class</th>
+                <th className="px-6 py-4">Student Name</th>
                 <th className="px-6 py-4">Index Number</th>
+                <th className="px-6 py-4">Class</th>
                 <th className="px-6 py-4">Date</th>
+                <th className="px-6 py-4">Time</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Action</th>
               </tr>
@@ -186,13 +188,15 @@ export default function AttendancePage() {
               {filteredAttendance.length > 0 ? (
                 filteredAttendance.map((entry) => (
                   <tr key={entry.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-6 py-4 text-slate-800 font-medium">
+                    <td className="px-6 py-4 text-slate-800 font-medium">{entry.studentName}</td>
+                    <td className="px-6 py-4 text-slate-600 font-mono text-xs">{entry.indexNumber}</td>
+                    <td className="px-6 py-4 text-slate-800">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 border border-slate-200">
                         {entry.className}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-600 font-mono text-xs">{entry.indexNumber}</td>
                     <td className="px-6 py-4 text-slate-600">{entry.date}</td>
+                    <td className="px-6 py-4 text-slate-600">{entry.time}</td>
                     <td className="px-6 py-4">
                       {entry.status === 'present' ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -217,7 +221,7 @@ export default function AttendancePage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan="7" className="px-6 py-12 text-center text-slate-500">
                     <div className="flex flex-col items-center justify-center">
                       <svg className="w-12 h-12 text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       <p>No attendance records found.</p>

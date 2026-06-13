@@ -1,71 +1,53 @@
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { useAdminData } from '../../contexts/AdminDataContext';
+import { attendanceAPI } from '../../services/endpoints';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function DashboardPage() {
-  const { students, attendance } = useAdminData();
+  const toast = useToast();
+  const [data, setData] = useState({
+    stats: {
+      totalStudents: 0,
+      totalClasses: 0,
+      presentToday: 0,
+      absentToday: 0,
+      attendanceRecords: 0
+    },
+    studentsByClass: [],
+    attendanceStatus: [],
+    attendanceTrend: [],
+    recentAttendance: []
+  });
+  const [loading, setLoading] = useState(true);
 
-  const stats = useMemo(() => {
-    const classes = new Set(students.map((student) => student.className)).size;
-    const today = new Date().toISOString().split('T')[0];
-    const todayRecords = attendance.filter((entry) => entry.date === today);
-
-    return {
-      totalStudents: students.length,
-      totalClasses: classes,
-      presentToday: todayRecords.filter((entry) => entry.status === 'present').length,
-      absentToday: todayRecords.filter((entry) => entry.status === 'absent').length,
-      attendanceRecords: attendance.length,
-    };
-  }, [students, attendance]);
-
-  // Chart data: Students per class
-  const studentsByClass = useMemo(() => {
-    const classMap = {};
-    students.forEach((student) => {
-      classMap[student.className] = (classMap[student.className] || 0) + 1;
-    });
-    return Object.entries(classMap).map(([name, count]) => ({
-      name,
-      students: count,
-    }));
-  }, [students]);
-
-  // Chart data: Attendance status (present vs absent)
-  const attendanceStatus = useMemo(() => {
-    const present = attendance.filter((e) => e.status === 'present').length;
-    const absent = attendance.filter((e) => e.status === 'absent').length;
-    return [
-      { name: 'Present', value: present, fill: '#10b981' },
-      { name: 'Absent', value: absent, fill: '#ef4444' },
-    ];
-  }, [attendance]);
-
-  // Chart data: Attendance trend (last 7 days)
-  const attendanceTrend = useMemo(() => {
-    const dates = {};
-    attendance.forEach((entry) => {
-      if (!dates[entry.date]) {
-        dates[entry.date] = { date: entry.date, present: 0, absent: 0 };
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const response = await attendanceAPI.getDashboardStats();
+        setData(response.data);
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+        toast.addToast('Failed to load dashboard statistics', 'error');
+      } finally {
+        setLoading(false);
       }
-      if (entry.status === 'present') dates[entry.date].present++;
-      else dates[entry.date].absent++;
-    });
-    return Object.values(dates)
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
-      .slice(-7);
-  }, [attendance]);
+    };
 
-  // Recent attendance records
-  const recentAttendance = useMemo(() => {
-    return attendance
-      .slice()
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .slice(0, 5);
-  }, [attendance]);
+    fetchDashboardStats();
+  }, [toast]);
+
+  const { stats, studentsByClass, attendanceStatus, attendanceTrend, recentAttendance } = data;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <section className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 px-4 sm:px-0">
@@ -166,7 +148,7 @@ export default function DashboardPage() {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-250 flex items-center justify-center text-slate-500">
+            <div className="h-[250px] flex items-center justify-center text-slate-500">
               <p className="text-sm">No attendance data available</p>
             </div>
           )}
@@ -203,7 +185,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm">
           <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-4">Overall Attendance Status</h3>
           {attendanceStatus.some((s) => s.value > 0) ? (
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie
                   data={attendanceStatus}
@@ -230,7 +212,7 @@ export default function DashboardPage() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-250 flex items-center justify-center text-slate-500">
+            <div className="h-[200px] flex items-center justify-center text-slate-500">
               <p className="text-sm">No attendance data available</p>
             </div>
           )}
@@ -240,12 +222,12 @@ export default function DashboardPage() {
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm">
           <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-4">Recent Attendance</h3>
           {recentAttendance.length > 0 ? (
-            <div className="space-y-2 sm:space-y-3 max-h-80 overflow-y-auto pr-2">
+            <div className="space-y-2 sm:space-y-3 max-h-56 overflow-y-auto pr-2">
               {recentAttendance.map((record) => (
                 <div key={record.id} className="flex items-center justify-between p-2 sm:p-3 bg-slate-50 rounded-lg border border-slate-100 hover:border-slate-200 transition-colors gap-2">
                   <div className="min-w-0">
-                    <p className="text-xs sm:text-sm font-semibold text-slate-800 truncate">{record.indexNumber}</p>
-                    <p className="text-xs text-slate-500 truncate">{record.className} • {record.date}</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-800 truncate">{record.studentName || record.indexNumber}</p>
+                    <p className="text-xs text-slate-500 truncate">{record.className} • {record.indexNumber} • {record.date}</p>
                   </div>
                   <span
                     className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 ${
@@ -260,7 +242,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="h-250 flex items-center justify-center text-slate-500">
+            <div className="h-[200px] flex items-center justify-center text-slate-500">
               <p className="text-sm">No attendance records</p>
             </div>
           )}

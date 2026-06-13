@@ -18,7 +18,8 @@ export const studentAPI = {
 export const attendanceAPI = {
   take: (data) => api.post('/attendance/take', data),
   getAll: (params) => api.get('/attendance', { params }),
-  getStats: () => api.get('/attendance/stats'),
+  getDashboardStats: () => api.get('/attendance/dashboard-stats'),
+  delete: (id) => api.delete(`/attendance/${id}`),
 };
 
 export const classAPI = {

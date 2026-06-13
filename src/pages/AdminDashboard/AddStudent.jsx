@@ -162,7 +162,12 @@ export default function RegisterNewStudent() {
                       <Webcam
                         ref={webcamRef}
                         screenshotFormat="image/jpeg"
-                        videoConstraints={{ facingMode: isMirror ? 'user' : 'environment' }}
+                        screenshotQuality={0.92}
+                        videoConstraints={{
+                          facingMode: isMirror ? 'user' : 'environment',
+                          width: 640,
+                          height: 480,
+                        }}
                         className="w-full aspect-square object-cover"
                       />
                     </div>
