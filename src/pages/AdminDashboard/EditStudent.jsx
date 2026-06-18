@@ -9,7 +9,7 @@ export default function EditStudent() {
   const toast = useToast();
   const navigate = useNavigate();
 
-  const student = students.find((s) => s.id === id);
+  const student = students.find((s) => s.id.toString() === id);
   const [form, setForm] = useState({ fullName: '', classId: '', indexNumber: '' });
 
   useEffect(() => {

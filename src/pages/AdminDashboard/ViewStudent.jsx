@@ -6,7 +6,7 @@ export default function ViewStudent() {
   const { students } = useAdminData();
   const navigate = useNavigate();
 
-  const student = students.find((s) => s.id === id);
+  const student = students.find((s) => s.id.toString() === id);
   if (!student) return <p className="text-slate-500">Student not found.</p>;
 
   return (
